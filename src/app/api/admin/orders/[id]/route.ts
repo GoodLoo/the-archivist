@@ -57,36 +57,40 @@ export async function PUT(
     }
 
     if (body.status === "confirmed" && existing.customer_email) {
-      try {
-        const transporter = nodemailer.createTransport({
-          host: process.env.SMTP_HOST,
-          port: Number(process.env.SMTP_PORT) || 587,
-          secure: false,
-          auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS },
-        });
-
-        await transporter.sendMail({
-          from: `"The Archivist" <${process.env.SMTP_USER}>`,
-          to: existing.customer_email,
-          subject: `Order Confirmed — ${existing.order_number}`,
-          html: buildOrderConfirmationHtml({
-            orderNumber: existing.order_number,
-            customer: existing.customer || existing.customer_name,
-            total: Number(existing.total),
-            subtotal: Number(existing.subtotal),
-            shipping: Number(existing.shipping) || 0,
-            tax: Number(existing.tax) || 0,
-            address: existing.address || "",
-            items: (existing.order_items || []).map((i: any) => ({
-              name: i.product_name || i.name,
-              quantity: i.quantity,
-              price: Number(i.price),
-            })),
-          }),
-        });
-      } catch (emailErr: any) {
-        console.error("Failed to send confirmation email:", emailErr?.message);
-      }
+      (async () => {
+        try {
+          const transporter = nodemailer.createTransport({
+            host: process.env.SMTP_HOST || "smtp.gmail.com",
+            port: Number(process.env.SMTP_PORT) || 587,
+            secure: false,
+            auth: {
+              user: process.env.SMTP_USER || "",
+              pass: process.env.SMTP_PASS || "",
+            },
+          });
+          await transporter.sendMail({
+            from: `"The Archivist" <${process.env.SMTP_USER || "noreply@thearchivist.com"}>`,
+            to: existing.customer_email,
+            subject: `Order Confirmed — ${existing.order_number}`,
+            html: buildOrderConfirmationHtml({
+              orderNumber: existing.order_number,
+              customer: existing.customer || existing.customer_name,
+              total: Number(existing.total),
+              subtotal: Number(existing.subtotal),
+              shipping: Number(existing.shipping) || 0,
+              tax: Number(existing.tax) || 0,
+              address: existing.address || "",
+              items: (existing.order_items || []).map((i: any) => ({
+                name: i.product_name || i.name,
+                quantity: i.quantity,
+                price: Number(i.price),
+              })),
+            }),
+          });
+        } catch (emailErr: any) {
+          console.error("Failed to send confirmation email:", emailErr?.message);
+        }
+      })();
     }
 
     if (body.status && body.status !== existing.status) {

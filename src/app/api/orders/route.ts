@@ -131,33 +131,37 @@ export async function POST(request: Request) {
       }
     }
 
-    if (isPaid && process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS) {
-      try {
-        const transporter = nodemailer.createTransport({
-          host: process.env.SMTP_HOST,
-          port: Number(process.env.SMTP_PORT) || 587,
-          secure: false,
-          auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS },
-        });
-
-        await transporter.sendMail({
-          from: `"The Archivist" <${process.env.SMTP_USER}>`,
-          to: email,
-          subject: `Order Confirmed — ${orderNumber}`,
-          html: buildOrderConfirmationHtml({
-            orderNumber,
-            customer,
-            total,
-            subtotal,
-            shipping,
-            tax,
-            address,
-            items: items.map((i: any) => ({ name: i.name, quantity: i.quantity, price: i.price })),
-          }),
-        });
-      } catch (emailErr: any) {
-        console.error("Failed to send order confirmation email:", emailErr?.message);
-      }
+    if (isPaid) {
+      (async () => {
+        try {
+          const transporter = nodemailer.createTransport({
+            host: process.env.SMTP_HOST || "smtp.gmail.com",
+            port: Number(process.env.SMTP_PORT) || 587,
+            secure: false,
+            auth: {
+              user: process.env.SMTP_USER || "",
+              pass: process.env.SMTP_PASS || "",
+            },
+          });
+          await transporter.sendMail({
+            from: `"The Archivist" <${process.env.SMTP_USER || "noreply@thearchivist.com"}>`,
+            to: email,
+            subject: `Order Confirmed — ${orderNumber}`,
+            html: buildOrderConfirmationHtml({
+              orderNumber,
+              customer,
+              total,
+              subtotal,
+              shipping,
+              tax,
+              address,
+              items: items.map((i: any) => ({ name: i.name, quantity: i.quantity, price: i.price })),
+            }),
+          });
+        } catch (emailErr: any) {
+          console.error("Failed to send order confirmation email:", emailErr?.message);
+        }
+      })();
     }
 
     return NextResponse.json({
