@@ -6,7 +6,7 @@ import { WishlistProvider } from "@/context/WishlistContext";
 import { CustomerAuthProvider } from "@/context/CustomerAuthContext";
 import SiteLayout from "@/components/SiteLayout";
 import JsonLd from "@/components/JsonLd";
-import { Analytics } from "@vercel/analytics/react";
+import { Analytics } from "@vercel/analytics/next";
 import "./globals.css";
 
 const spaceGrotesk = Space_Grotesk({
