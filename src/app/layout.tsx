@@ -7,6 +7,7 @@ import { CustomerAuthProvider } from "@/context/CustomerAuthContext";
 import SiteLayout from "@/components/SiteLayout";
 import JsonLd from "@/components/JsonLd";
 import { Analytics } from "@vercel/analytics/react";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 import "./globals.css";
 
 const spaceGrotesk = Space_Grotesk({
@@ -97,6 +98,7 @@ export default function RootLayout({
                 <SiteLayout>
                   {children}
                   <Analytics />
+                  <SpeedInsights />
                 </SiteLayout>
               </CustomerAuthProvider>
             </WishlistProvider>
