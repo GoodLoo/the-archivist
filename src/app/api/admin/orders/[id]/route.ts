@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase";
+import { buildOrderConfirmationHtml } from "@/lib/email";
 import nodemailer from "nodemailer";
 
 export async function GET(
@@ -56,10 +57,6 @@ export async function PUT(
     }
 
     if (body.status === "confirmed" && existing.customer_email) {
-      const itemsList = (existing.order_items || [])
-        .map((i: any) => `${i.product_name || i.name} x${i.quantity} — $${(Number(i.price) * i.quantity).toFixed(2)}`)
-        .join("<br/>");
-
       try {
         const transporter = nodemailer.createTransport({
           host: process.env.SMTP_HOST,
@@ -72,22 +69,20 @@ export async function PUT(
           from: `"The Archivist" <${process.env.SMTP_USER}>`,
           to: existing.customer_email,
           subject: `Order Confirmed — ${existing.order_number}`,
-          html: `
-            <div style="font-family: Inter, sans-serif; max-width: 600px; margin: 0 auto;">
-              <div style="text-align:center;margin-bottom:24px;">
-                <img src="https://thearchivist.com/favicon.ico" alt="The Archivist" style="height:48px;width:48px;" />
-                <h1 style="color:#DC143C;font-size:28px;margin:8px 0 0;">Order Confirmed!</h1>
-              </div>
-              <p>Hi <strong>${existing.customer}</strong>,</p>
-              <p>Your order <strong>${existing.order_number}</strong> has been confirmed and is being processed.</p>
-              <h3>Order Summary</h3>
-              ${itemsList}
-              <p><strong>Total: $${Number(existing.total).toFixed(2)}</strong></p>
-              <h3>Shipping Address</h3>
-              <p>${existing.address}</p>
-              <p style="color: #666;">Thank you for shopping at The Archivist!</p>
-            </div>
-          `,
+          html: buildOrderConfirmationHtml({
+            orderNumber: existing.order_number,
+            customer: existing.customer || existing.customer_name,
+            total: Number(existing.total),
+            subtotal: Number(existing.subtotal),
+            shipping: Number(existing.shipping) || 0,
+            tax: Number(existing.tax) || 0,
+            address: existing.address || "",
+            items: (existing.order_items || []).map((i: any) => ({
+              name: i.product_name || i.name,
+              quantity: i.quantity,
+              price: Number(i.price),
+            })),
+          }),
         });
       } catch (emailErr: any) {
         console.error("Failed to send confirmation email:", emailErr?.message);
