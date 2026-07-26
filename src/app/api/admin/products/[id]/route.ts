@@ -68,6 +68,9 @@ export async function DELETE(
   try {
     const { id } = await params;
     await supabaseAdmin.from("product_images").delete().eq("product_id", id);
+    await supabaseAdmin.from("cart_items").delete().eq("product_id", id);
+    await supabaseAdmin.from("wishlist_items").delete().eq("product_id", id);
+    await supabaseAdmin.from("order_items").delete().eq("product_id", id);
     const { error } = await supabaseAdmin.from("products").delete().eq("id", id);
     if (error) {
       return NextResponse.json({ error: String(error) }, { status: 500 });

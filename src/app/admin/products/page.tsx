@@ -98,7 +98,8 @@ export default function AdminProductsPage() {
     setDeleting(id);
     try {
       const res = await fetch(`/api/admin/products/${id}`, { method: "DELETE" });
-      if (!res.ok) throw new Error("Delete failed");
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Delete failed");
       setProducts((prev) => prev.filter((p) => p.id !== id));
     } catch (err: any) {
       alert(err?.message || "Delete failed");
