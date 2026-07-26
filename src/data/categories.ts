@@ -1,0 +1,68 @@
+import { Category } from "@/types";
+
+export const categories: Category[] = [
+  {
+    id: "01",
+    name: "Marvel Multiverse",
+    slug: "marvel-multiverse",
+    description: "Legendary heroes and villains from the Marvel universe",
+    image: "https://placehold.co/600x400/DC143C/ffffff?text=Marvel",
+    productCount: 6,
+  },
+  {
+    id: "02",
+    name: "DC Multiverse",
+    slug: "dc-multiverse",
+    description: "Iconic characters from the DC universe",
+    image: "https://placehold.co/600x400/1E90FF/ffffff?text=DC",
+    productCount: 6,
+  },
+  {
+    id: "03",
+    name: "Wizarding World",
+    slug: "wizarding-world",
+    description: "Magical figurines from Harry Potter and Fantastic Beasts",
+    image: "https://placehold.co/600x400/4A148C/ffffff?text=Wizarding",
+    productCount: 5,
+  },
+  {
+    id: "04",
+    name: "Star Wars Galaxy",
+    slug: "star-wars-galaxy",
+    description: "Far far away collectibles from a galaxy far away",
+    image: "https://placehold.co/600x400/000000/ffffff?text=Star+Wars",
+    productCount: 6,
+  },
+  {
+    id: "05",
+    name: "Anime & Manga",
+    slug: "anime-manga",
+    description: "Premium figurines from your favorite anime series",
+    image: "https://placehold.co/600x400/FF69B4/ffffff?text=Anime",
+    productCount: 6,
+  },
+  {
+    id: "06",
+    name: "Gaming & Esports",
+    slug: "gaming-esports",
+    description: "Video game icons brought to life",
+    image: "https://placehold.co/600x400/00C853/ffffff?text=Gaming",
+    productCount: 5,
+  },
+  {
+    id: "07",
+    name: "Cinema & Television",
+    slug: "cinema-television",
+    description: "Screen legends from film and TV history",
+    image: "https://placehold.co/600x400/FF6F00/ffffff?text=Cinema",
+    productCount: 5,
+  },
+  {
+    id: "08",
+    name: "Premium Originals",
+    slug: "premium-originals",
+    description: "Exclusive Archivist original designs",
+    image: "https://placehold.co/600x400/D4AF37/ffffff?text=Originals",
+    productCount: 4,
+  },
+];

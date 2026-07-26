@@ -1,0 +1,146 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --font-heading: "Space Grotesk", sans-serif;
+  --font-body: "Inter", sans-serif;
+
+  --color-crimson: #dc143c;
+  --color-crimson-light: #ff1f4a;
+  --color-crimson-dark: #b00e2f;
+
+  --color-dark-bg: #141313;
+  --color-dark-surface: #1c1b1b;
+  --color-dark-border: #333333;
+  --color-dark-text: #e5e2e1;
+  --color-dark-text-secondary: #a0a0a0;
+
+  --color-light-bg: #f0f0f0;
+  --color-light-surface: #ffffff;
+  --color-light-border: #b0b0b0;
+  --color-light-text: #111111;
+  --color-light-text-secondary: #444444;
+}
+
+@layer base {
+  * {
+    box-sizing: border-box;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    overflow-x: hidden;
+  }
+
+  body {
+    font-family: var(--font-body);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    overflow-x: hidden;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-heading);
+    font-weight: 700;
+  }
+}
+
+@utility panel {
+  border: 1px solid var(--color-dark-border);
+  @media (prefers-color-scheme: light) {
+    border-color: var(--color-light-border);
+  }
+  .dark & {
+    border-color: var(--color-dark-border);
+  }
+}
+
+@utility glow-crimson {
+  border: 1px solid var(--color-crimson);
+  box-shadow: 0 0 8px color-mix(in srgb, var(--color-crimson) 40%, transparent);
+}
+
+@utility btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 0.875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border: 1px solid var(--color-crimson);
+  background-color: var(--color-crimson);
+  color: white;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+@utility btn-primary-hover {
+  &:hover {
+    background-color: transparent;
+    color: var(--color-crimson);
+  }
+}
+
+@utility btn-outline {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 0.875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border: 1px solid var(--color-light-text);
+  color: var(--color-light-text);
+  background: transparent;
+  cursor: pointer;
+  transition: all 0.2s;
+  @variant dark {
+    border-color: var(--color-dark-text);
+    color: var(--color-dark-text);
+  }
+}
+
+@utility btn-outline-hover {
+  &:hover {
+    background-color: var(--color-light-text);
+    color: var(--color-light-bg);
+    @variant dark {
+      background-color: var(--color-dark-text);
+      color: var(--color-dark-bg);
+    }
+  }
+}
+
+@utility input-field {
+  width: 100%;
+  padding: 0.75rem 0;
+  font-family: var(--font-body);
+  font-size: 1rem;
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid var(--color-light-border);
+  color: var(--color-light-text);
+  outline: none;
+  transition: border-color 0.2s;
+  &:focus {
+    border-bottom-color: var(--color-crimson);
+  }
+  &::placeholder {
+    color: var(--color-light-text-secondary);
+  }
+  @variant dark {
+    border-bottom-color: var(--color-dark-border);
+    color: var(--color-dark-text);
+    &::placeholder {
+      color: var(--color-dark-text-secondary);
+    }
+  }
+}
