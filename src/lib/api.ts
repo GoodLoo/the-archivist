@@ -24,6 +24,7 @@ export interface ProductRow {
   weight: string | null;
   height: string | null;
   features: string[];
+  is_featured?: boolean;
 }
 
 export interface ProductImageRow {
@@ -84,7 +85,7 @@ export async function getFeaturedProducts(): Promise<ProductRow[]> {
   const { data } = await supabase
     .from("products")
     .select("*")
-    .in("id", ["marvel-01", "marvel-04", "dc-01", "dc-04", "sw-01", "sw-04", "gaming-01", "gaming-04"])
+    .eq("is_featured", true)
     .order("name");
   return data || [];
 }

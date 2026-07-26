@@ -27,6 +27,7 @@ interface Product {
   weight: string;
   height: string;
   features: string[];
+  is_featured?: boolean;
 }
 
 interface Category {
@@ -174,6 +175,7 @@ export default function AdminProductsPage() {
                 <th className="p-3 font-medium">Stock</th>
                 <th className="p-3 font-medium">Qty</th>
                 <th className="p-3 font-medium">Scale</th>
+                <th className="p-3 font-medium">Featured</th>
                 <th className="p-3 font-medium"></th>
             </tr>
           </thead>
@@ -222,6 +224,7 @@ export default function AdminProductsPage() {
                       </td>
                       <td className="p-3 text-dark-text-secondary dark:text-dark-text-secondary text-gray-600">{product.stock_quantity > 0 ? product.stock_quantity : "∞"}</td>
                       <td className="p-3 text-dark-text-secondary dark:text-dark-text-secondary text-gray-600">{product.scale}</td>
+                      <td className="p-3">{product.is_featured ? <span className="text-[10px] font-bold text-crimson">★ Featured</span> : <span className="text-[10px] text-dark-text-secondary/50">—</span>}</td>
                       <td className="p-3 whitespace-nowrap">
                         <Link href={`/admin/products/${product.id}/edit`} className="text-[10px] font-bold uppercase tracking-wider text-crimson hover:underline mr-3">
                           Edit

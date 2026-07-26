@@ -77,28 +77,7 @@ export default function HeroSection() {
           </div>
         </div>
 
-        {!hasCarousel && (
-          <div className="relative hidden lg:block">
-            <div className="relative mx-auto aspect-[3/4] max-w-md overflow-hidden border border-dark-border dark:border-dark-border border-light-border">
-              <div className="absolute inset-0 bg-gradient-to-tr from-dark-bg via-transparent to-transparent dark:from-dark-bg via-transparent to-transparent from-white via-transparent to-transparent z-10" />
-              <Image
-                src="https://placehold.co/600x800/DC143C/ffffff?text=Featured+Figurine"
-                alt="Featured premium figurine"
-                fill
-                sizes="(max-width: 768px) 100vw, 50vw"
-                className="object-cover"
-              />
-              <div className="absolute bottom-0 left-0 right-0 z-20 border-t border-dark-border/50 dark:border-dark-border/50 border-light-border/50 bg-dark-bg/80 dark:bg-dark-bg/80 bg-white/80 p-4 backdrop-blur-sm">
-                <p className="font-heading text-sm font-bold uppercase tracking-wider">
-                  Featured: <span className="text-crimson">Iron Man Mark III</span>
-                </p>
-                <p className="text-xs text-dark-text-secondary dark:text-dark-text-secondary text-light-text-secondary">
-                  Marvel Multiverse — Limited Edition
-                </p>
-              </div>
-            </div>
-          </div>
-        )}
+        
       </div>
 
       {hasCarousel && slides.length > 1 && (

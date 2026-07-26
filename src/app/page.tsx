@@ -16,7 +16,7 @@ export default function HomePage() {
   useEffect(() => {
     Promise.all([
       supabase.from("categories").select("*, products!left(count)").order("id"),
-      supabase.from("products").select("*, product_images(url, is_primary), categories(slug)").in("id", ["marvel-01", "marvel-04", "dc-01", "dc-04", "sw-01", "sw-04", "gaming-01", "gaming-04"]).order("name")
+      supabase.from("products").select("*, product_images(url, is_primary), categories(slug)").eq("is_featured", true).order("name")
     ]).then(([{ data: catData }, { data: prodData }]) => {
       if (catData) setCategories(
         catData.map((cat: any) => ({ ...cat, product_count: cat.products?.[0]?.count ?? 0 }))

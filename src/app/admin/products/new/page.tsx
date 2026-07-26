@@ -43,6 +43,7 @@ export default function NewProductPage() {
     height: "",
     sourceLink: "",
     features: [] as string[],
+    isFeatured: false,
   });
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [previews, setPreviews] = useState<string[]>([]);
@@ -106,6 +107,7 @@ export default function NewProductPage() {
           height: form.height || null,
           features: form.features,
           source_link: form.sourceLink || null,
+          is_featured: form.isFeatured,
         }),
       });
       const data = await res.json();
@@ -180,13 +182,20 @@ export default function NewProductPage() {
                 <label className="text-[11px] font-bold uppercase tracking-wider text-dark-text-secondary dark:text-dark-text-secondary text-gray-500 mb-1.5 block">Stock Quantity</label>
                 <input name="stockQuantity" type="number" min="0" value={form.stockQuantity} onChange={handleChange} className="input-field w-full" placeholder="0 = unlimited" />
               </div>
-              <div>
-                <label className="text-[11px] font-bold uppercase tracking-wider text-dark-text-secondary dark:text-dark-text-secondary text-gray-500 mb-1.5 block">In Stock</label>
-                <label className="flex items-center gap-2 mt-2 cursor-pointer">
-                  <input name="inStock" type="checkbox" checked={form.inStock} onChange={(e) => setForm({ ...form, inStock: e.target.checked })} className="accent-crimson h-4 w-4" />
-                  <span className="text-xs text-dark-text-secondary dark:text-dark-text-secondary text-gray-600">{form.inStock ? "In stock" : "Out of stock"}</span>
-                </label>
-              </div>
+            <div>
+              <label className="text-[11px] font-bold uppercase tracking-wider text-dark-text-secondary dark:text-dark-text-secondary text-gray-500 mb-1.5 block">In Stock</label>
+              <label className="flex items-center gap-2 mt-2 cursor-pointer">
+                <input name="inStock" type="checkbox" checked={form.inStock} onChange={(e) => setForm({ ...form, inStock: e.target.checked })} className="accent-crimson h-4 w-4" />
+                <span className="text-xs text-dark-text-secondary dark:text-dark-text-secondary text-gray-600">{form.inStock ? "In stock" : "Out of stock"}</span>
+              </label>
+            </div>
+            <div>
+              <label className="text-[11px] font-bold uppercase tracking-wider text-dark-text-secondary dark:text-dark-text-secondary text-gray-500 mb-1.5 block">Featured</label>
+              <label className="flex items-center gap-2 mt-2 cursor-pointer select-none">
+                <input name="isFeatured" type="checkbox" checked={form.isFeatured} onChange={(e) => setForm({ ...form, isFeatured: e.target.checked })} className="appearance-auto accent-crimson h-4 w-4 shrink-0" />
+                <span className={`text-xs font-medium ${form.isFeatured ? "text-crimson" : "text-dark-text-secondary dark:text-dark-text-secondary text-gray-600"}`}>{form.isFeatured ? "★ Featured on homepage" : "Not featured"}</span>
+              </label>
+            </div>
               <div>
                 <label className="text-[11px] font-bold uppercase tracking-wider text-dark-text-secondary dark:text-dark-text-secondary text-gray-500 mb-1.5 block">Scale</label>
                 <input name="scale" value={form.scale} onChange={handleChange} className="input-field w-full" placeholder="e.g. 1/6" />

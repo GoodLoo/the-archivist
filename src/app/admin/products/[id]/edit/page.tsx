@@ -53,6 +53,7 @@ export default function EditProductPage() {
     height: "",
     sourceLink: "",
     features: [] as string[],
+    isFeatured: false,
   });
   const [loading, setLoading] = useState(true);
   const [images, setImages] = useState<ProductImage[]>([]);
@@ -91,6 +92,7 @@ export default function EditProductPage() {
             height: p.height || "",
             sourceLink: p.source_link || "",
             features: p.features || [],
+            isFeatured: p.is_featured ?? false,
           });
           if (p.product_images) {
             setImages(p.product_images);
@@ -136,6 +138,7 @@ export default function EditProductPage() {
           height: form.height || null,
           features: form.features,
           source_link: form.sourceLink || null,
+          is_featured: form.isFeatured,
         }),
       });
       const data = await res.json();
@@ -259,6 +262,13 @@ export default function EditProductPage() {
               <label className="flex items-center gap-2 mt-2 cursor-pointer">
                 <input name="inStock" type="checkbox" checked={form.inStock} onChange={(e) => setForm({ ...form, inStock: e.target.checked })} className="accent-crimson h-4 w-4" />
                 <span className="text-xs text-dark-text-secondary dark:text-dark-text-secondary text-gray-600">{form.inStock ? "In stock" : "Out of stock"}</span>
+              </label>
+            </div>
+            <div>
+              <label className="text-[11px] font-bold uppercase tracking-wider text-dark-text-secondary dark:text-dark-text-secondary text-gray-500 mb-1.5 block">Featured</label>
+              <label className="flex items-center gap-2 mt-2 cursor-pointer select-none">
+                <input name="isFeatured" type="checkbox" checked={form.isFeatured} onChange={(e) => setForm({ ...form, isFeatured: e.target.checked })} className="appearance-auto accent-crimson h-4 w-4 shrink-0" />
+                <span className={`text-xs font-medium ${form.isFeatured ? "text-crimson" : "text-dark-text-secondary dark:text-dark-text-secondary text-gray-600"}`}>{form.isFeatured ? "★ Featured on homepage" : "Not featured"}</span>
               </label>
             </div>
             <div>

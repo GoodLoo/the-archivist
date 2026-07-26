@@ -47,6 +47,7 @@ export async function PUT(
         height: body.height || null,
         features: body.features || [],
         source_link: body.source_link || null,
+        is_featured: body.is_featured ?? false,
       })
       .eq("id", id)
       .select()
