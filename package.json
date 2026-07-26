@@ -13,6 +13,7 @@
     "@stripe/stripe-js": "^9.12.0",
     "@supabase/ssr": "^0.12.3",
     "@supabase/supabase-js": "^2.110.7",
+    "@vercel/analytics": "^2.0.1",
     "jspdf": "^4.2.1",
     "next": "^15.5.20",
     "nodemailer": "^9.0.3",
