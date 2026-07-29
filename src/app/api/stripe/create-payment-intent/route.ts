@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import Stripe from "stripe";
+import { loadSettings, parseTaxRate, parseFreeShippingThreshold, parseShippingCost } from "@/lib/settings";
 
 function getStripe() {
   const key = process.env.STRIPE_SECRET_KEY;
@@ -23,8 +24,10 @@ export async function POST(request: Request) {
 
     const subtotal = items.reduce((sum: number, item: any) => sum + item.price * item.quantity, 0);
     const afterDiscount = subtotal - (discount || 0);
-    const shipping = afterDiscount > 500 ? 0 : 15.99;
-    const tax = afterDiscount * 0.08;
+    const settings = await loadSettings();
+    const freeThreshold = parseFreeShippingThreshold(settings.freeShippingThreshold);
+    const shipping = afterDiscount > freeThreshold ? 0 : parseShippingCost(settings.shippingCost);
+    const tax = afterDiscount * parseTaxRate(settings.taxRate);
     const total = Math.round((afterDiscount + shipping + tax) * 100);
 
     const address = `${street}, ${city}, ${state} ${zip}, ${country}`;

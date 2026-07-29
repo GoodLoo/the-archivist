@@ -1,13 +1,10 @@
 ﻿"use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useCart } from "@/context/CartContext";
 import SeoHead from "@/components/SeoHead";
-
-const SHIPPING_COST = 15.99;
-const TAX_RATE = 0.08;
 
 export default function CartPage() {
   const { items, subtotal, updateQuantity, removeItem, clearCart, loaded } = useCart();
@@ -16,6 +13,20 @@ export default function CartPage() {
   const [couponError, setCouponError] = useState("");
   const [couponApplied, setCouponApplied] = useState("");
   const [applying, setApplying] = useState(false);
+  const [taxRate, setTaxRate] = useState(0.08);
+  const [freeThreshold, setFreeThreshold] = useState(500);
+  const [shippingCost, setShippingCost] = useState(15.99);
+
+  useEffect(() => {
+    fetch("/api/settings")
+      .then((r) => r.json())
+      .then((s) => {
+        if (s.taxRate) setTaxRate(parseFloat(s.taxRate) / 100);
+        if (s.freeShippingThreshold) setFreeThreshold(parseFloat(s.freeShippingThreshold));
+        if (s.shippingCost) setShippingCost(parseFloat(s.shippingCost));
+      })
+      .catch(() => {});
+  }, []);
 
   if (!loaded) {
     return (
@@ -47,8 +58,8 @@ export default function CartPage() {
       </div>
     );
   }
-  const shipping = subtotal > 500 ? 0 : SHIPPING_COST;
-  const tax = subtotal * TAX_RATE;
+  const shipping = subtotal > freeThreshold ? 0 : shippingCost;
+  const tax = subtotal * taxRate;
   const totalAfterDiscount = subtotal - discount;
   const total = totalAfterDiscount + shipping + tax;
 
@@ -240,13 +251,13 @@ export default function CartPage() {
                 <span>Shipping</span>
                 <span>{shipping === 0 ? <span className="text-green-500">Free</span> : `$${shipping.toFixed(2)}`}</span>
               </div>
-              {subtotal < 500 && (
+              {shipping > 0 && (
                 <p className="text-[10px] text-dark-text-secondary dark:text-dark-text-secondary text-light-text-secondary">
-                  Free shipping on orders over $500.00
+                  Free shipping on orders over ${freeThreshold.toFixed(2)}
                 </p>
               )}
               <div className="flex justify-between text-dark-text-secondary dark:text-dark-text-secondary text-light-text-secondary">
-                <span>Tax (8%)</span>
+                <span>Tax ({(taxRate * 100).toFixed(1)}%)</span>
                 <span>${tax.toFixed(2)}</span>
               </div>
               <div className="flex justify-between border-t border-dark-border/50 dark:border-dark-border/50 border-light-border/50 pt-3 font-heading text-base font-bold text-dark-text dark:text-dark-text text-light-text">

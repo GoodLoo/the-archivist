@@ -16,9 +16,6 @@ const stripePromise = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
   ? loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY)
   : null;
 
-const SHIPPING_COST = 15.99;
-const TAX_RATE = 0.08;
-
 const COUNTRIES = [
   "United States", "Canada", "United Kingdom", "Australia", "New Zealand",
   "Germany", "France", "Italy", "Spain", "Netherlands", "Belgium", "Switzerland",
@@ -94,6 +91,9 @@ export default function CheckoutPage() {
   const { user } = useCustomerAuth();
   const [couponCode, setCouponCode] = useState("");
   const [couponDiscount, setCouponDiscount] = useState(0);
+  const [taxRate, setTaxRate] = useState(0.08);
+  const [freeThreshold, setFreeThreshold] = useState(500);
+  const [shippingCost, setShippingCost] = useState(15.99);
 
   useEffect(() => {
     const stored = sessionStorage.getItem("checkoutCoupon");
@@ -104,10 +104,18 @@ export default function CheckoutPage() {
         setCouponDiscount(c.discount || 0);
       } catch {}
     }
+    fetch("/api/settings")
+      .then((r) => r.json())
+      .then((s) => {
+        if (s.taxRate) setTaxRate(parseFloat(s.taxRate) / 100);
+        if (s.freeShippingThreshold) setFreeThreshold(parseFloat(s.freeShippingThreshold));
+        if (s.shippingCost) setShippingCost(parseFloat(s.shippingCost));
+      })
+      .catch(() => {});
   }, []);
 
-  const shipping = subtotal > 500 ? 0 : SHIPPING_COST;
-  const tax = subtotal * TAX_RATE;
+  const shipping = subtotal > freeThreshold ? 0 : shippingCost;
+  const tax = subtotal * taxRate;
   const afterDiscount = subtotal - couponDiscount;
   const total = afterDiscount + shipping + tax;
 
@@ -611,8 +619,8 @@ export default function CheckoutPage() {
                 <div className="flex justify-between text-green-500"><span>Discount ({couponCode})</span><span>-${couponDiscount.toFixed(2)}</span></div>
               )}
               <div className="flex justify-between text-dark-text-secondary"><span>Shipping</span><span>{shipping === 0 ? <span className="text-green-500">Free</span> : `$${shipping.toFixed(2)}`}</span></div>
-              {subtotal < 500 && <p className="text-[10px] text-dark-text-secondary">Free shipping on orders over $500</p>}
-              <div className="flex justify-between text-dark-text-secondary"><span>Tax (8%)</span><span>${tax.toFixed(2)}</span></div>
+              {shipping > 0 && <p className="text-[10px] text-dark-text-secondary">Free shipping on orders over ${freeThreshold}</p>}
+              <div className="flex justify-between text-dark-text-secondary"><span>Tax ({(taxRate * 100).toFixed(1)}%)</span><span>${tax.toFixed(2)}</span></div>
               <div className="flex justify-between border-t border-dark-border/50 pt-2 font-heading text-base font-bold"><span>Total</span><span className="text-crimson">${total.toFixed(2)}</span></div>
             </div>
 

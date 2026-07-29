@@ -18,6 +18,7 @@ export default function SettingsPage() {
     currency: "USD",
     taxRate: "8.875",
     freeShippingThreshold: "100",
+    shippingCost: "15.99",
     whatsappPhone: "+1234567890",
     facebook: "https://facebook.com/archivist",
     twitter: "https://twitter.com/archivist",
@@ -143,6 +144,10 @@ export default function SettingsPage() {
             <div>
               <label className="text-[11px] font-bold uppercase tracking-wider text-dark-text-secondary dark:text-dark-text-secondary text-gray-500 mb-1.5 block">Free Shipping Over ($)</label>
               <input name="freeShippingThreshold" value={form.freeShippingThreshold} onChange={handleChange} className="input-field w-full" />
+            </div>
+            <div>
+              <label className="text-[11px] font-bold uppercase tracking-wider text-dark-text-secondary dark:text-dark-text-secondary text-gray-500 mb-1.5 block">Shipping Cost ($)</label>
+              <input name="shippingCost" value={form.shippingCost} onChange={handleChange} className="input-field w-full" />
             </div>
           </div>
         </div>
