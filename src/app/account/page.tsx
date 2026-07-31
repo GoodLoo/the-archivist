@@ -63,10 +63,16 @@ export default function AccountPage() {
 
   useEffect(() => {
     if (!user) return;
-    supabase
+    const email = user.email || "";
+    const query = supabase
       .from("orders")
-      .select("order_number, date, status, total, id")
-      .eq("user_id", user.id)
+      .select("order_number, date, status, total, id");
+    if (email) {
+      query.or(`user_id.eq.${user.id},customer_email.eq.${email}`);
+    } else {
+      query.eq("user_id", user.id);
+    }
+    query
       .order("date", { ascending: false })
       .then(({ data }) => {
         if (data) {
