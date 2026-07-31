@@ -38,7 +38,7 @@ export default function SiteLayout({ children }: { children: React.ReactNode }) 
         <>
           <Header mobileOpen={mobileOpen} onToggleMobile={onToggleMobile} onCloseMobile={onCloseMobile} />
           <div className="storefront pt-16 md:pt-20 px-5 lg:px-16" style={{ zoom: 0.9 }}>
-            <main className="flex-1">{children}</main>
+            <main className="flex-1 pb-16 md:pb-24">{children}</main>
             <Footer />
           </div>
         </>

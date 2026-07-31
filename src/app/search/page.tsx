@@ -13,6 +13,28 @@ import Pagination from "@/components/Pagination";
 
 const PAGE_SIZE = 8;
 
+function relevanceScore(product: { name: string; description: string }, q: string): number {
+  const query = q.toLowerCase().trim();
+  const name = product.name.toLowerCase();
+  const description = (product.description || "").toLowerCase();
+  const terms = query.split(/\s+/).filter(Boolean);
+
+  let score = 0;
+
+  if (name === query) score += 100;
+  if (name.startsWith(query)) score += 80;
+  if (name.includes(query)) score += 60;
+  if (description.includes(query)) score += 30;
+
+  const matchingTerms = terms.filter((t) => name.includes(t)).length;
+  score += matchingTerms * 10;
+  score += terms.filter((t) => description.includes(t)).length * 2;
+
+  if (score === 0 && description.includes(query)) score = 30;
+
+  return score;
+}
+
 function SearchResults() {
   const searchParams = useSearchParams();
   const q = searchParams.get("q") || "";
@@ -36,23 +58,25 @@ function SearchResults() {
         .then(({ data }) => {
           if (data) {
             setResults(
-              data.map((p: any) => ({
-                id: p.id,
-                name: p.name,
-                price: p.price,
-                originalPrice: p.original_price,
-                image: p.product_images?.find((img: any) => img.is_primary)?.url || p.product_images?.[0]?.url || "",
-                images: p.product_images?.map((img: any) => img.url) || [],
-                category: p.categories?.slug || p.category_id,
-                description: p.description || "",
-                inStock: p.in_stock,
-                scale: p.scale,
-                material: p.material,
-                edition: p.edition,
-                weight: p.weight,
-                height: p.height,
-                features: p.features || [],
-              }))
+              data
+                .map((p: any) => ({
+                  id: p.id,
+                  name: p.name,
+                  price: p.price,
+                  originalPrice: p.original_price,
+                  image: p.product_images?.find((img: any) => img.is_primary)?.url || p.product_images?.[0]?.url || "",
+                  images: p.product_images?.map((img: any) => img.url) || [],
+                  category: p.categories?.slug || p.category_id,
+                  description: p.description || "",
+                  inStock: p.in_stock,
+                  scale: p.scale,
+                  material: p.material,
+                  edition: p.edition,
+                  weight: p.weight,
+                  height: p.height,
+                  features: p.features || [],
+                }))
+                .sort((a: any, b: any) => relevanceScore(b, q) - relevanceScore(a, q))
             );
           }
           setSearching(false);

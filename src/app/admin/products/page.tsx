@@ -45,6 +45,7 @@ export default function AdminProductsPage() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [search, setSearch] = useState("");
   const [deleting, setDeleting] = useState<string | null>(null);
+  const [duplicating, setDuplicating] = useState<string | null>(null);
   const [page, setPage] = useState(1);
   const categoryFilter = searchParams.get("category") || "";
 
@@ -106,6 +107,20 @@ export default function AdminProductsPage() {
       alert(err?.message || "Delete failed");
     } finally {
       setDeleting(null);
+    }
+  };
+
+  const handleDuplicate = async (product: Product) => {
+    setDuplicating(product.id);
+    try {
+      const res = await fetch(`/api/admin/products/${product.id}/duplicate`, { method: "POST" });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Duplicate failed");
+      setProducts((prev) => [...prev, data.product]);
+    } catch (err: any) {
+      alert(err?.message || "Duplicate failed");
+    } finally {
+      setDuplicating(null);
     }
   };
 
@@ -229,6 +244,13 @@ export default function AdminProductsPage() {
                         <Link href={`/admin/products/${product.id}/edit`} className="text-[10px] font-bold uppercase tracking-wider text-crimson hover:underline mr-3">
                           Edit
                         </Link>
+                        <button
+                          onClick={() => handleDuplicate(product)}
+                          disabled={duplicating === product.id}
+                          className="text-[10px] font-bold uppercase tracking-wider text-blue-500 hover:underline mr-3 disabled:opacity-50"
+                        >
+                          {duplicating === product.id ? "..." : "Duplicate"}
+                        </button>
                         <button
                           onClick={() => handleDelete(product.id, product.name)}
                           disabled={deleting === product.id}

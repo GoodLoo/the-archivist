@@ -114,9 +114,9 @@ export default function CheckoutPage() {
       .catch(() => {});
   }, []);
 
-  const shipping = subtotal > freeThreshold ? 0 : shippingCost;
-  const tax = subtotal * taxRate;
   const afterDiscount = subtotal - couponDiscount;
+  const shipping = afterDiscount > freeThreshold ? 0 : shippingCost;
+  const tax = afterDiscount * taxRate;
   const total = afterDiscount + shipping + tax;
 
   const [form, setForm] = useState({

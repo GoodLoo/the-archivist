@@ -34,30 +34,52 @@ export function CustomerAuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const login = async (email: string, password: string): Promise<string | null> => {
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
-    return error?.message || null;
+    try {
+      const { error } = await supabase.auth.signInWithPassword({ email, password });
+      return error?.message || null;
+    } catch (err: any) {
+      return err?.message || "Unable to sign in. Please try again.";
+    }
   };
 
   const signup = async (email: string, password: string): Promise<string | null> => {
-    const { error } = await supabase.auth.signUp({ email, password });
-    return error?.message || null;
+    try {
+      const { data, error } = await supabase.auth.signUp({ email, password });
+      if (error) return error.message || "Unable to create account. Please try again.";
+      if (!data.user && !data.session) {
+        return "Account created but we couldn't send the confirmation email. Please contact support.";
+      }
+      return null;
+    } catch (err: any) {
+      return err?.message || "Unable to create account. Please try again.";
+    }
   };
 
   const logout = async () => {
-    await supabase.auth.signOut();
+    try {
+      await supabase.auth.signOut();
+    } catch {}
     setUser(null);
   };
 
   const resetPassword = async (email: string): Promise<string | null> => {
-    const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${window.location.origin}/reset-password`,
-    });
-    return error?.message || null;
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/reset-password`,
+      });
+      return error?.message || null;
+    } catch (err: any) {
+      return err?.message || "Unable to send reset link. Please try again.";
+    }
   };
 
   const updatePassword = async (password: string): Promise<string | null> => {
-    const { error } = await supabase.auth.updateUser({ password });
-    return error?.message || null;
+    try {
+      const { error } = await supabase.auth.updateUser({ password });
+      return error?.message || null;
+    } catch (err: any) {
+      return err?.message || "Unable to update password. Please try again.";
+    }
   };
 
   return (

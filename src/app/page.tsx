@@ -7,6 +7,7 @@ import HeroSection from "@/components/HeroSection";
 import ProductGrid from "@/components/ProductGrid";
 import Link from "next/link";
 import { Product } from "@/types";
+import { shuffle } from "@/lib/shuffle";
 
 export default function HomePage() {
   const [categories, setCategories] = useState<any[]>([]);
@@ -22,7 +23,7 @@ export default function HomePage() {
         catData.map((cat: any) => ({ ...cat, product_count: cat.products?.[0]?.count ?? 0 }))
       );
       if (prodData) setFeaturedProducts(
-        prodData.map((p: any) => ({
+        shuffle(prodData.map((p: any) => ({
           id: p.id,
           name: p.name,
           price: p.price,
@@ -38,7 +39,7 @@ export default function HomePage() {
           weight: p.weight,
           height: p.height,
           features: p.features || [],
-        }))
+        })))
       );
       setLoading(false);
     });

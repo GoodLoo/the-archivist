@@ -29,13 +29,16 @@ export async function loadSettings(): Promise<StoreSettings> {
 }
 
 export function parseTaxRate(taxRate: string): number {
-  return parseFloat(taxRate) / 100;
+  const parsed = parseFloat(taxRate);
+  return isNaN(parsed) ? 0.08875 : parsed / 100;
 }
 
 export function parseFreeShippingThreshold(threshold: string): number {
-  return parseFloat(threshold) || 100;
+  const parsed = parseFloat(threshold);
+  return isNaN(parsed) ? 100 : parsed;
 }
 
 export function parseShippingCost(cost: string): number {
-  return parseFloat(cost) || 15.99;
+  const parsed = parseFloat(cost);
+  return isNaN(parsed) ? 15.99 : parsed;
 }

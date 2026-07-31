@@ -58,9 +58,9 @@ export default function CartPage() {
       </div>
     );
   }
-  const shipping = subtotal > freeThreshold ? 0 : shippingCost;
-  const tax = subtotal * taxRate;
   const totalAfterDiscount = subtotal - discount;
+  const shipping = totalAfterDiscount > freeThreshold ? 0 : shippingCost;
+  const tax = totalAfterDiscount * taxRate;
   const total = totalAfterDiscount + shipping + tax;
 
   const applyCoupon = async () => {

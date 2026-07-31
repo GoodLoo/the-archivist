@@ -11,6 +11,7 @@ import { useWishlist } from "@/context/WishlistContext";
 import type { Product } from "@/types";
 import SeoHead from "@/components/SeoHead";
 import ContactModal from "@/components/ContactModal";
+import { shuffle } from "@/lib/shuffle";
 
 export default function ProductDetailPage() {
   const [contactOpen, setContactOpen] = useState(false);
@@ -87,7 +88,7 @@ export default function ProductDetailPage() {
 
       if (relData) {
         setRelated(
-          relData.map((p: any) => ({
+          shuffle(relData.map((p: any) => ({
             id: p.id,
             name: p.name,
             price: p.price,
@@ -103,7 +104,7 @@ export default function ProductDetailPage() {
             weight: p.weight,
             height: p.height,
             features: p.features || [],
-          }))
+          })))
         );
       }
     };
@@ -199,8 +200,8 @@ export default function ProductDetailPage() {
         <span className="text-xs text-dark-text-secondary">{product.name}</span>
       </nav>
 
-      <div className="grid gap-8 lg:grid-cols-2">
-        <div className="space-y-3">
+      <div className="grid min-w-0 gap-8 lg:grid-cols-2">
+        <div className="min-w-0 space-y-3">
           <div className="relative aspect-square overflow-hidden border border-dark-border dark:border-dark-border border-light-border bg-dark-surface dark:bg-dark-surface bg-gray-100">
             <Image
               src={displayImage}
@@ -229,13 +230,13 @@ export default function ProductDetailPage() {
           )}
         </div>
 
-        <div className="flex flex-col justify-center space-y-6">
-          <div className="flex items-start justify-between">
-            <div>
+        <div className="flex min-w-0 flex-col justify-center space-y-6">
+          <div className="flex items-start justify-between gap-4">
+            <div className="min-w-0">
               <p className="font-heading text-sm font-bold uppercase tracking-wider text-crimson">
                 {categoryName}
               </p>
-              <h1 className="mt-2 font-heading text-3xl font-extrabold tracking-tight sm:text-4xl">
+              <h1 className="mt-2 break-words font-heading text-3xl font-extrabold tracking-tight sm:text-4xl">
                 {product.name}
               </h1>
             </div>
@@ -276,7 +277,7 @@ export default function ProductDetailPage() {
             )}
           </div>
 
-          <p className="text-sm leading-relaxed text-dark-text-secondary dark:text-dark-text-secondary text-light-text-secondary">
+          <p className="break-words text-sm leading-relaxed text-dark-text-secondary dark:text-dark-text-secondary text-light-text-secondary">
             {product.description}
           </p>
 
@@ -293,7 +294,7 @@ export default function ProductDetailPage() {
           )}
 
           {product.inStock && (
-            <div className="flex items-center border border-dark-border dark:border-dark-border border-light-border">
+            <div className="inline-flex w-fit items-center border border-dark-border dark:border-dark-border border-light-border">
               <button onClick={() => setQuantity(Math.max(1, quantity - 1))} className="flex h-10 w-10 items-center justify-center text-sm transition-colors hover:bg-dark-surface dark:hover:bg-dark-surface hover:bg-gray-100">&minus;</button>
               <span className="flex h-10 w-12 items-center justify-center text-sm font-bold border-x border-dark-border dark:border-dark-border border-light-border">{quantity}</span>
               <button onClick={() => setQuantity(quantity + 1)} className="flex h-10 w-10 items-center justify-center text-sm transition-colors hover:bg-dark-surface dark:hover:bg-dark-surface hover:bg-gray-100">+</button>

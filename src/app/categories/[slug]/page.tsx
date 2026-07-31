@@ -10,6 +10,7 @@ import Link from "next/link";
 import type { Product, Category } from "@/types";
 import Pagination from "@/components/Pagination";
 import SeoHead from "@/components/SeoHead";
+import { shuffle } from "@/lib/shuffle";
 
 const PAGE_SIZE = 8;
 
@@ -72,7 +73,7 @@ export default function CategoryPage() {
         .then(({ data }) => {
           if (data) {
             setRawProducts(
-              data.map((p: any) => ({
+              shuffle(data.map((p: any) => ({
                 id: p.id,
                 name: p.name,
                 price: p.price,
@@ -88,7 +89,7 @@ export default function CategoryPage() {
                 weight: p.weight,
                 height: p.height,
                 features: p.features || [],
-              }))
+              })))
             );
           }
           setLoading(false);
