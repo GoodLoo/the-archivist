@@ -26,11 +26,14 @@ export default function SignupPage() {
     }
     setLoading(true);
     const err = await signup(email, password);
-    if (err) {
+    if (err && err.startsWith("Account created")) {
+      setSuccess(err);
+      setLoading(false);
+    } else if (err) {
       setError(err);
       setLoading(false);
     } else {
-      setSuccess("Account created! Check your email for a confirmation link, then sign in.");
+      router.push("/account");
     }
   };
 

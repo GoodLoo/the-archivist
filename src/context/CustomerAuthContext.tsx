@@ -46,10 +46,14 @@ export function CustomerAuthProvider({ children }: { children: ReactNode }) {
     try {
       const { data, error } = await supabase.auth.signUp({ email, password });
       if (error) return error.message || "Unable to create account. Please try again.";
-      if (!data.user && !data.session) {
-        return "Account created but we couldn't send the confirmation email. Please contact support.";
+      if (data.session) {
+        setUser(data.session.user);
+        return null;
       }
-      return null;
+      if (data.user) {
+        return "Account created! Check your email for a confirmation link, then sign in.";
+      }
+      return "Unable to create account. Please try again.";
     } catch (err: any) {
       return err?.message || "Unable to create account. Please try again.";
     }
