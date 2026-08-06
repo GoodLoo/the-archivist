@@ -19,6 +19,31 @@ function cacheKey(userId: string) {
   return `voucher_${userId}`;
 }
 
+async function copyToClipboard(text: string) {
+  try {
+    await navigator.clipboard.writeText(text);
+    return true;
+  } catch {
+    try {
+      const ta = document.createElement("textarea");
+      ta.value = text;
+      ta.setAttribute("readonly", "");
+      ta.style.position = "fixed";
+      ta.style.top = "0";
+      ta.style.opacity = "0";
+      document.body.appendChild(ta);
+      ta.focus();
+      ta.select();
+      ta.setSelectionRange(0, text.length);
+      const ok = document.execCommand("copy");
+      document.body.removeChild(ta);
+      return ok;
+    } catch {
+      return false;
+    }
+  }
+}
+
 export default function VoucherPopup() {
   const { user } = useCustomerAuth();
   const router = useRouter();
@@ -32,7 +57,7 @@ export default function VoucherPopup() {
   const isHome = pathname === "/";
   const isProductPage = /^\/categories\/[^/]+\/[^/]+$/.test(pathname);
   const isPopupPage = isHome || isProductPage;
-  const seenKey = isHome ? "voucher_popup_seen_home" : isProductPage ? "voucher_popup_seen_product" : "";
+  const guestSeenKey = isHome ? "voucher_popup_seen_home" : isProductPage ? "voucher_popup_seen_product" : "";
   const isUsableCode =
     !!code &&
     (code.status === "reserved" || code.status === "active") &&
@@ -83,22 +108,31 @@ export default function VoucherPopup() {
 
   useEffect(() => {
     if (stage !== "idle") return;
-    if (!isPopupPage || !seenKey) return;
-    if (sessionStorage.getItem(seenKey)) return;
-    if (user && !isUsableCode) return;
+    if (!isPopupPage || !guestSeenKey) return;
+    if (user) return;
+    if (sessionStorage.getItem(guestSeenKey)) return;
 
     const t = setTimeout(() => {
-      sessionStorage.setItem(seenKey, "1");
-      if (!user) {
-        setStage("offer");
-      } else {
-        setStage("claimed");
-      }
+      sessionStorage.setItem(guestSeenKey, "1");
+      setStage("offer");
     }, 2500);
     return () => clearTimeout(t);
-  }, [stage, pathname, user, isUsableCode, isPopupPage, seenKey]);
+  }, [stage, pathname, user, isPopupPage, guestSeenKey]);
 
-  const showLabel = !!user && !isPopupPage && isUsableCode;
+  useEffect(() => {
+    if (stage !== "idle") return;
+    if (!isPopupPage) return;
+    if (!user || !isUsableCode) return;
+    if (localStorage.getItem("voucher_popup_seen_once")) return;
+
+    const t = setTimeout(() => {
+      localStorage.setItem("voucher_popup_seen_once", "1");
+      setStage("claimed");
+    }, 2500);
+    return () => clearTimeout(t);
+  }, [stage, pathname, user, isUsableCode, isPopupPage]);
+
+  const showLabel = !!user && isUsableCode && pathname !== "/checkout";
 
   const dismissOffer = () => {
     sessionStorage.setItem("voucher_offer_dismissed", "1");
@@ -112,10 +146,10 @@ export default function VoucherPopup() {
     return (
       <button
         onClick={() => setStage("claimed")}
-        className="fixed bottom-6 right-6 z-[70] flex items-center gap-2 border border-crimson/40 bg-white px-3 py-2 text-xs font-semibold text-crimson shadow-lg transition-colors hover:border-crimson dark:bg-dark-bg"
+        className="fixed right-3 top-16 z-[70] flex items-center gap-1.5 border border-crimson/40 bg-white px-2.5 py-1 text-[11px] font-semibold text-crimson shadow-md transition-colors hover:border-crimson md:right-5 md:top-20 dark:bg-dark-bg"
         aria-label="View your voucher code"
       >
-        <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+        <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
           <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 10.5V6a3.75 3.75 0 10-7.5 0v4.5m11.356-1.993l1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 01-1.12-1.243l1.264-12A1.125 1.125 0 015.513 7.5h12.974c.576 0 1.059.435 1.119 1.007z" />
         </svg>
         Voucher: {code?.code}
@@ -193,13 +227,12 @@ export default function VoucherPopup() {
               <span className="font-heading text-xl font-extrabold tracking-widest text-crimson">{code.code}</span>
               <button
                 onClick={async () => {
-                  try {
-                    await navigator.clipboard.writeText(code.code);
+                  if (await copyToClipboard(code.code)) {
                     setCopied(true);
                     setTimeout(() => setCopied(false), 1500);
-                  } catch {}
+                  }
                 }}
-                className="text-[10px] font-bold uppercase tracking-wider text-dark-text-secondary transition-colors hover:text-crimson"
+                className="px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-crimson transition-colors hover:bg-crimson/10"
               >
                 {copied ? "Copied!" : "Copy"}
               </button>
