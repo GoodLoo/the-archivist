@@ -29,6 +29,15 @@ export default function VoucherPopup() {
   const [copied, setCopied] = useState(false);
   const [claimError, setClaimError] = useState("");
 
+  const isHome = pathname === "/";
+  const isProductPage = /^\/categories\/[^/]+\/[^/]+$/.test(pathname);
+  const isPopupPage = isHome || isProductPage;
+  const seenKey = isHome ? "voucher_popup_seen_home" : isProductPage ? "voucher_popup_seen_product" : "";
+  const isUsableCode =
+    !!code &&
+    (code.status === "reserved" || code.status === "active") &&
+    (!code.expires_at || new Date(code.expires_at) > new Date());
+
   useEffect(() => {
     if (prevPath.current !== pathname) {
       prevPath.current = pathname;
@@ -37,38 +46,20 @@ export default function VoucherPopup() {
   }, [pathname]);
 
   useEffect(() => {
-    if (stage !== "idle") return;
-
-    if (!user) {
-      const dismissed = sessionStorage.getItem("voucher_offer_dismissed");
-      if (!dismissed) {
-        const t = setTimeout(() => setStage("offer"), 2500);
-        return () => clearTimeout(t);
-      }
-      return;
-    }
-
-    const cachedRaw = sessionStorage.getItem(cacheKey(user.id));
+    if (!user) return;
+    const key = cacheKey(user.id);
+    const cachedRaw = sessionStorage.getItem(key);
     if (cachedRaw) {
       try {
         const cached = JSON.parse(cachedRaw);
-        if (cached.status === "used" || cached.status === "none") return;
-        if (cached.expires_at && new Date(cached.expires_at) < new Date()) return;
-        setCode(cached);
-        setStage("claimed");
-        return;
+        if (cached.id) setCode(cached);
       } catch {}
+      return;
     }
-
-    setStage("loading");
     (async () => {
       const { data: { session } } = await supabase.auth.getSession();
       const token = session?.access_token;
-      if (!token) {
-        setClaimError("You must be signed in to claim a voucher");
-        setStage("unavailable");
-        return;
-      }
+      if (!token) return;
       try {
         const res = await fetch("/api/vouchers/claim", {
           method: "POST",
@@ -78,26 +69,36 @@ export default function VoucherPopup() {
         if (res.ok && data.code) {
           const c = data.code;
           if (c.status === "used" || (c.expires_at && new Date(c.expires_at) < new Date())) {
-            sessionStorage.setItem(cacheKey(user.id), JSON.stringify({ status: "used" }));
-            setStage("idle");
-            return;
+            sessionStorage.setItem(key, JSON.stringify({ status: "used" }));
+          } else {
+            sessionStorage.setItem(key, JSON.stringify(c));
+            setCode(c);
           }
-          sessionStorage.setItem(cacheKey(user.id), JSON.stringify(c));
-          setCode(c);
-          setStage("claimed");
         } else if (res.status === 404) {
-          sessionStorage.setItem(cacheKey(user.id), JSON.stringify({ status: "none" }));
-          setStage("idle");
-        } else {
-          setClaimError(data.error || "Unable to claim your voucher");
-          setStage("unavailable");
+          sessionStorage.setItem(key, JSON.stringify({ status: "none" }));
         }
-      } catch {
-        setClaimError("Unable to claim your voucher. Please try again.");
-        setStage("unavailable");
-      }
+      } catch {}
     })();
-  }, [stage, user, pathname]);
+  }, [user]);
+
+  useEffect(() => {
+    if (stage !== "idle") return;
+    if (!isPopupPage || !seenKey) return;
+    if (sessionStorage.getItem(seenKey)) return;
+    if (user && !isUsableCode) return;
+
+    const t = setTimeout(() => {
+      sessionStorage.setItem(seenKey, "1");
+      if (!user) {
+        setStage("offer");
+      } else {
+        setStage("claimed");
+      }
+    }, 2500);
+    return () => clearTimeout(t);
+  }, [stage, pathname, user, isUsableCode, isPopupPage, seenKey]);
+
+  const showLabel = !!user && !isPopupPage && isUsableCode;
 
   const dismissOffer = () => {
     sessionStorage.setItem("voucher_offer_dismissed", "1");
@@ -106,16 +107,30 @@ export default function VoucherPopup() {
 
   const closeAll = () => setStage("closed");
 
-  if (stage === "idle" || stage === "closed") return null;
+  if (stage === "idle" || stage === "closed") {
+    if (!showLabel) return null;
+    return (
+      <button
+        onClick={() => setStage("claimed")}
+        className="fixed bottom-6 right-6 z-[70] flex items-center gap-2 border border-crimson/40 bg-white px-3 py-2 text-xs font-semibold text-crimson shadow-lg transition-colors hover:border-crimson dark:bg-dark-bg"
+        aria-label="View your voucher code"
+      >
+        <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 10.5V6a3.75 3.75 0 10-7.5 0v4.5m11.356-1.993l1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 01-1.12-1.243l1.264-12A1.125 1.125 0 015.513 7.5h12.974c.576 0 1.059.435 1.119 1.007z" />
+        </svg>
+        Voucher: {code?.code}
+      </button>
+    );
+  }
 
   return (
     <>
       <div className="fixed inset-0 z-[80] bg-black/60 backdrop-blur-sm" onClick={stage === "loading" ? undefined : closeAll} />
-      <div className="fixed left-1/2 top-1/2 z-[81] w-[92vw] max-w-md -translate-x-1/2 -translate-y-1/2 border border-crimson/40 bg-dark-bg dark:bg-dark-bg bg-white p-6 sm:p-8">
+      <div className="fixed left-1/2 top-1/2 z-[81] w-[92vw] max-w-md -translate-x-1/2 -translate-y-1/2 border border-crimson/40 bg-white p-6 dark:bg-dark-bg sm:p-8">
         <button
           onClick={closeAll}
           disabled={stage === "loading"}
-          className="absolute right-4 top-4 text-dark-text-secondary hover:text-crimson transition-colors disabled:opacity-40"
+          className="absolute right-4 top-4 text-dark-text-secondary transition-colors hover:text-crimson disabled:opacity-40"
           aria-label="Close"
         >
           <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -131,10 +146,10 @@ export default function VoucherPopup() {
               </svg>
             </div>
             <p className="mb-1 font-heading text-[10px] font-bold uppercase tracking-widest text-crimson">Limited Time Offer</p>
-            <h2 className="mb-2 font-heading text-2xl font-extrabold tracking-tight text-dark-text dark:text-dark-text text-gray-900">
+            <h2 className="mb-2 font-heading text-2xl font-extrabold tracking-tight text-gray-900 dark:text-dark-text">
               Get a <span className="text-crimson">Voucher</span> Code
             </h2>
-            <p className="mb-6 text-sm text-dark-text-secondary dark:text-dark-text-secondary text-gray-500">
+            <p className="mb-6 text-sm text-gray-500 dark:text-dark-text-secondary">
               Create a free account and we&apos;ll reserve an exclusive discount code just for you.
             </p>
             <div className="flex flex-col gap-2">
@@ -144,7 +159,7 @@ export default function VoucherPopup() {
               >
                 Create Account &amp; Get Code
               </button>
-              <button onClick={dismissOffer} className="w-full py-2 text-xs font-medium text-dark-text-secondary hover:text-crimson transition-colors">
+              <button onClick={dismissOffer} className="w-full py-2 text-xs font-medium text-dark-text-secondary transition-colors hover:text-crimson">
                 No thanks, continue browsing
               </button>
             </div>
@@ -153,7 +168,7 @@ export default function VoucherPopup() {
 
         {stage === "loading" && (
           <div className="py-10 text-center">
-            <div className="mx-auto mb-4 h-8 w-8 animate-spin border-2 border-crimson border-t-transparent rounded-full" />
+            <div className="mx-auto mb-4 h-8 w-8 animate-spin rounded-full border-2 border-crimson border-t-transparent" />
             <p className="text-sm text-dark-text-secondary">Reserving your voucher code...</p>
           </div>
         )}
@@ -166,10 +181,10 @@ export default function VoucherPopup() {
               </svg>
             </div>
             <p className="mb-1 font-heading text-[10px] font-bold uppercase tracking-widest text-green-500">Voucher Reserved</p>
-            <h2 className="mb-1 font-heading text-2xl font-extrabold tracking-tight text-dark-text dark:text-dark-text text-gray-900">
+            <h2 className="mb-1 font-heading text-2xl font-extrabold tracking-tight text-gray-900 dark:text-dark-text">
               Your Voucher Code
             </h2>
-            <p className="mb-5 text-sm text-dark-text-secondary dark:text-dark-text-secondary text-gray-500">
+            <p className="mb-5 text-sm text-gray-500 dark:text-dark-text-secondary">
               Use this code at checkout for{" "}
               {code.type === "percentage" ? `${code.value}% off` : `$${Number(code.value).toFixed(2)} off`}{" "}
               your order.
@@ -184,7 +199,7 @@ export default function VoucherPopup() {
                     setTimeout(() => setCopied(false), 1500);
                   } catch {}
                 }}
-                className="text-[10px] font-bold uppercase tracking-wider text-dark-text-secondary hover:text-crimson transition-colors"
+                className="text-[10px] font-bold uppercase tracking-wider text-dark-text-secondary transition-colors hover:text-crimson"
               >
                 {copied ? "Copied!" : "Copy"}
               </button>
@@ -195,10 +210,10 @@ export default function VoucherPopup() {
               </p>
             )}
             <div className="flex flex-col gap-2">
-              <Link href="/categories" onClick={closeAll} className="btn-primary w-full text-sm text-center">
+              <Link href="/categories" onClick={closeAll} className="btn-primary w-full text-center text-sm">
                 Start Shopping
               </Link>
-              <button onClick={closeAll} className="w-full py-2 text-xs font-medium text-dark-text-secondary hover:text-crimson transition-colors">
+              <button onClick={closeAll} className="w-full py-2 text-xs font-medium text-dark-text-secondary transition-colors hover:text-crimson">
                 Close
               </button>
             </div>
@@ -207,10 +222,10 @@ export default function VoucherPopup() {
 
         {stage === "unavailable" && (
           <div className="text-center">
-            <h2 className="mb-2 font-heading text-2xl font-extrabold tracking-tight text-dark-text dark:text-dark-text text-gray-900">
+            <h2 className="mb-2 font-heading text-2xl font-extrabold tracking-tight text-gray-900 dark:text-dark-text">
               {claimError || "No vouchers available"}
             </h2>
-            <p className="mb-6 text-sm text-dark-text-secondary dark:text-dark-text-secondary text-gray-500">
+            <p className="mb-6 text-sm text-gray-500 dark:text-dark-text-secondary">
               All current vouchers have been claimed. Check back soon.
             </p>
             <button onClick={closeAll} className="btn-primary w-full text-sm">
