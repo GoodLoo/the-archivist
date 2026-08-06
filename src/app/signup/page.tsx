@@ -33,7 +33,8 @@ export default function SignupPage() {
       setError(err);
       setLoading(false);
     } else {
-      router.push("/account");
+      const next = new URLSearchParams(window.location.search).get("next");
+      router.push(next || "/account");
     }
   };
 

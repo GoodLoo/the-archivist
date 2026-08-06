@@ -357,6 +357,9 @@ export default function CheckoutPage() {
     });
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || "Failed to place order");
+    for (const key of Object.keys(sessionStorage)) {
+      if (key.startsWith("voucher_")) sessionStorage.removeItem(key);
+    }
     return data;
   };
 

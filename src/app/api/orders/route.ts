@@ -77,13 +77,15 @@ export async function POST(request: Request) {
       } else {
         const { data: discountRow } = await supabaseAdmin
           .from("discount_codes")
-          .select("used_count")
+          .select("used_count, max_uses, status")
           .ilike("code", couponCode)
           .single();
         if (discountRow) {
+          const newCount = (discountRow.used_count || 0) + 1;
+          const status = newCount >= discountRow.max_uses ? "used" : discountRow.status;
           await supabaseAdmin
             .from("discount_codes")
-            .update({ used_count: (discountRow.used_count || 0) + 1 })
+            .update({ used_count: newCount, status })
             .ilike("code", couponCode);
         }
       }

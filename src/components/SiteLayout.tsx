@@ -7,6 +7,7 @@ import Header from "./Header";
 import Footer from "./Footer";
 import ScrollToTop from "./ScrollToTop";
 import CategoryDropdown from "./CategoryDropdown";
+import VoucherPopup from "./VoucherPopup";
 import { useCart } from "@/context/CartContext";
 import { useTheme } from "@/context/ThemeContext";
 import { useCustomerAuth } from "@/context/CustomerAuthContext";
@@ -34,6 +35,7 @@ export default function SiteLayout({ children }: { children: React.ReactNode }) 
   return (
     <>
       <ScrollToTop />
+      {!isAdmin && <VoucherPopup />}
       {!isAdmin && (
         <>
           <Header mobileOpen={mobileOpen} onToggleMobile={onToggleMobile} onCloseMobile={onCloseMobile} />

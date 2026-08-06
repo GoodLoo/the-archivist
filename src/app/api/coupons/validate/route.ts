@@ -33,6 +33,10 @@ export async function POST(request: Request) {
         return NextResponse.json({ valid: false, error: "This coupon has expired" });
       }
 
+      if (discountCode.status === "used") {
+        return NextResponse.json({ valid: false, error: "This coupon has reached its usage limit" });
+      }
+
       if (discountCode.used_count >= discountCode.max_uses) {
         return NextResponse.json({ valid: false, error: "This coupon has reached its usage limit" });
       }

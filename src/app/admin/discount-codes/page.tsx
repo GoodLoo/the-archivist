@@ -13,6 +13,8 @@ interface DiscountCode {
   is_active: boolean;
   batch_label: string | null;
   created_at: string;
+  status: "active" | "reserved" | "used";
+  reserved_email: string | null;
 }
 
 interface Settings {
@@ -25,7 +27,7 @@ interface Settings {
 
 export default function AdminDiscountCodesPage() {
   const [codes, setCodes] = useState<DiscountCode[]>([]);
-  const [stats, setStats] = useState({ total: 0, active: 0, redeemed: 0 });
+  const [stats, setStats] = useState({ total: 0, active: 0, reserved: 0, used: 0, redeemed: 0 });
   const [settings, setSettings] = useState<Settings>({});
   const [generating, setGenerating] = useState(false);
   const [deleting, setDeleting] = useState<string | null>(null);
@@ -138,7 +140,8 @@ export default function AdminDiscountCodesPage() {
 
   const statusOf = (code: DiscountCode): { label: string; color: string } => {
     if (isExpired(code.expires_at)) return { label: "Expired", color: "text-gray-500" };
-    if (code.used_count >= code.max_uses) return { label: "Used Up", color: "text-orange-500" };
+    if (code.status === "used") return { label: "Used", color: "text-orange-500" };
+    if (code.status === "reserved") return { label: "Reserved", color: "text-crimson" };
     return code.is_active
       ? { label: "Active", color: "text-green-500" }
       : { label: "Disabled", color: "text-red-500" };
@@ -152,11 +155,13 @@ export default function AdminDiscountCodesPage() {
         </h1>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-6">
+      <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 mb-6">
         {[
           { label: "Total Generated", value: stats.total, color: "text-dark-text" },
           { label: "Active", value: stats.active, color: "text-green-500" },
-          { label: "Total Redeemed", value: stats.redeemed, color: "text-crimson" },
+          { label: "Reserved", value: stats.reserved, color: "text-crimson" },
+          { label: "Used", value: stats.used, color: "text-orange-500" },
+          { label: "Total Redeemed", value: stats.redeemed, color: "text-gray-400" },
         ].map((card) => (
           <div key={card.label} className="border border-dark-border dark:border-dark-border border-gray-200 bg-dark-surface dark:bg-dark-surface bg-white p-3">
             <p className="text-[9px] font-bold uppercase tracking-wider text-dark-text-secondary dark:text-dark-text-secondary text-gray-500 mb-0.5">{card.label}</p>
@@ -220,6 +225,7 @@ export default function AdminDiscountCodesPage() {
               <th className="p-3 font-medium">Usage</th>
               <th className="p-3 font-medium">Expires</th>
               <th className="p-3 font-medium">Batch</th>
+              <th className="p-3 font-medium">Reserved For</th>
               <th className="p-3 font-medium">Status</th>
               <th className="p-3 font-medium"></th>
             </tr>
@@ -244,11 +250,19 @@ export default function AdminDiscountCodesPage() {
                     ) : "—"}
                   </td>
                   <td className="p-3 text-dark-text-secondary">{code.batch_label || "—"}</td>
+                  <td className="p-3 text-dark-text-secondary">
+                    {code.status === "reserved" ? (
+                      code.reserved_email || "—"
+                    ) : (
+                      <span className="text-dark-text-secondary/50">—</span>
+                    )}
+                  </td>
                   <td className="p-3">
                     <button
                       onClick={() => toggleActive(code)}
-                      disabled={isExpired(code.expires_at) || code.used_count >= code.max_uses}
+                      disabled={isExpired(code.expires_at) || code.status !== "active"}
                       className={`text-xs font-medium disabled:opacity-50 ${status.color}`}
+                      title={code.status !== "active" ? "Only active codes can be toggled" : undefined}
                     >
                       {status.label}
                     </button>
@@ -262,7 +276,7 @@ export default function AdminDiscountCodesPage() {
               );
             })}
             {codes.length === 0 && (
-              <tr><td colSpan={7} className="p-6 text-center text-sm text-dark-text-secondary">No discount codes yet. Generate your first batch above.</td></tr>
+              <tr><td colSpan={8} className="p-6 text-center text-sm text-dark-text-secondary">No discount codes yet. Generate your first batch above.</td></tr>
             )}
           </tbody>
         </table>

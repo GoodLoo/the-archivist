@@ -29,18 +29,43 @@ export async function GET() {
     const codes = data || [];
     const now = Date.now();
     let active = 0;
+    let reserved = 0;
+    let used = 0;
     let redeemed = 0;
+
+    const reservedIds = codes.filter((c) => c.status === "reserved" && c.reserved_by).map((c) => c.reserved_by);
+    const { data: profiles } = await supabaseAdmin
+      .from("customer_profiles")
+      .select("id, email")
+      .in("id", reservedIds);
+
+    const emailByUser: Record<string, string> = {};
+    for (const p of profiles || []) {
+      emailByUser[p.id] = p.email;
+    }
+
     for (const c of codes) {
       const expired = c.expires_at && new Date(c.expires_at).getTime() < now;
-      if (c.is_active && !expired) active++;
+      if (c.status === "reserved") {
+        reserved++;
+      } else if (c.status === "used") {
+        used++;
+      } else if (c.is_active && !expired) {
+        active++;
+      }
       redeemed += c.used_count;
     }
 
     return NextResponse.json({
-      codes,
+      codes: codes.map((c) => ({
+        ...c,
+        reserved_email: c.reserved_by ? emailByUser[c.reserved_by] || null : null,
+      })),
       stats: {
         total: codes.length,
         active,
+        reserved,
+        used,
         redeemed,
       },
     });
