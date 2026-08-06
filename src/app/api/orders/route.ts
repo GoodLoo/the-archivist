@@ -74,6 +74,18 @@ export async function POST(request: Request) {
           .from("coupons")
           .update({ used_count: (couponRow.used_count || 0) + 1 })
           .ilike("code", couponCode);
+      } else {
+        const { data: discountRow } = await supabaseAdmin
+          .from("discount_codes")
+          .select("used_count")
+          .ilike("code", couponCode)
+          .single();
+        if (discountRow) {
+          await supabaseAdmin
+            .from("discount_codes")
+            .update({ used_count: (discountRow.used_count || 0) + 1 })
+            .ilike("code", couponCode);
+        }
       }
     }
 

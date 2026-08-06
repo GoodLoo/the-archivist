@@ -15,7 +15,47 @@ export async function POST(request: Request) {
       .single();
 
     if (error || !coupon) {
-      return NextResponse.json({ valid: false, error: "Invalid coupon code" });
+      const { data: discountCode, error: discountError } = await supabaseAdmin
+        .from("discount_codes")
+        .select("*")
+        .ilike("code", code.trim())
+        .single();
+
+      if (discountError || !discountCode) {
+        return NextResponse.json({ valid: false, error: "Invalid coupon code" });
+      }
+
+      if (!discountCode.is_active) {
+        return NextResponse.json({ valid: false, error: "This coupon is no longer active" });
+      }
+
+      if (discountCode.expires_at && new Date(discountCode.expires_at) < new Date()) {
+        return NextResponse.json({ valid: false, error: "This coupon has expired" });
+      }
+
+      if (discountCode.used_count >= discountCode.max_uses) {
+        return NextResponse.json({ valid: false, error: "This coupon has reached its usage limit" });
+      }
+
+      let discount = 0;
+      if (discountCode.type === "percentage") {
+        discount = (subtotal * discountCode.value) / 100;
+      } else {
+        discount = discountCode.value;
+      }
+
+      discount = Math.min(discount, subtotal);
+
+      return NextResponse.json({
+        valid: true,
+        coupon: {
+          id: discountCode.id,
+          code: discountCode.code,
+          type: discountCode.type,
+          value: discountCode.value,
+        },
+        discount,
+      });
     }
 
     if (!coupon.is_active) {

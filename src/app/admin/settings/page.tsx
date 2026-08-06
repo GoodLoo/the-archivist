@@ -23,6 +23,11 @@ export default function SettingsPage() {
     facebook: "https://facebook.com/archivist",
     twitter: "https://twitter.com/archivist",
     instagram: "https://instagram.com/archivist",
+    discountPrefix: "ARCHIV",
+    discountDefaultType: "percentage",
+    discountDefaultValue: "10",
+    discountDefaultExpiryDays: "30",
+    discountDefaultMaxUses: "1",
   });
   const [saved, setSaved] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -158,6 +163,36 @@ export default function SettingsPage() {
             <label className="text-[11px] font-bold uppercase tracking-wider text-dark-text-secondary dark:text-dark-text-secondary text-gray-500 mb-1.5 block">WhatsApp Phone Number</label>
             <input name="whatsappPhone" value={form.whatsappPhone} onChange={handleChange} className="input-field w-full" placeholder="+1234567890" />
             <p className="text-[10px] text-dark-text-secondary dark:text-dark-text-secondary text-gray-500 mt-1">Used for the wa.me redirect link when customers confirm checkout.</p>
+          </div>
+        </div>
+
+        <div className="border border-dark-border dark:border-dark-border border-gray-200 bg-dark-surface dark:bg-dark-surface bg-white p-5">
+          <h2 className="font-heading text-sm font-bold uppercase tracking-wider mb-4">Discount Codes</h2>
+          <p className="text-[10px] text-dark-text-secondary dark:text-dark-text-secondary text-gray-500 mb-4">Defaults used to pre-fill the batch generator on the Discount Codes page. You can override them each time you generate.</p>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div>
+              <label className="text-[11px] font-bold uppercase tracking-wider text-dark-text-secondary dark:text-dark-text-secondary text-gray-500 mb-1.5 block">Code Prefix</label>
+              <input name="discountPrefix" value={form.discountPrefix} onChange={handleChange} className="input-field w-full" placeholder="ARCHIV" />
+            </div>
+            <div>
+              <label className="text-[11px] font-bold uppercase tracking-wider text-dark-text-secondary dark:text-dark-text-secondary text-gray-500 mb-1.5 block">Default Discount Type</label>
+              <select name="discountDefaultType" value={form.discountDefaultType} onChange={handleChange} className="input-field w-full">
+                <option value="percentage">Percentage (%)</option>
+                <option value="fixed">Fixed Amount ($)</option>
+              </select>
+            </div>
+            <div>
+              <label className="text-[11px] font-bold uppercase tracking-wider text-dark-text-secondary dark:text-dark-text-secondary text-gray-500 mb-1.5 block">Default Discount Value</label>
+              <input name="discountDefaultValue" value={form.discountDefaultValue} onChange={handleChange} className="input-field w-full" placeholder="10" />
+            </div>
+            <div>
+              <label className="text-[11px] font-bold uppercase tracking-wider text-dark-text-secondary dark:text-dark-text-secondary text-gray-500 mb-1.5 block">Default Expiry (days)</label>
+              <input name="discountDefaultExpiryDays" value={form.discountDefaultExpiryDays} onChange={handleChange} className="input-field w-full" placeholder="30" />
+            </div>
+            <div>
+              <label className="text-[11px] font-bold uppercase tracking-wider text-dark-text-secondary dark:text-dark-text-secondary text-gray-500 mb-1.5 block">Default Max Uses Per Code</label>
+              <input name="discountDefaultMaxUses" value={form.discountDefaultMaxUses} onChange={handleChange} className="input-field w-full" placeholder="1" />
+            </div>
           </div>
         </div>
 

@@ -15,6 +15,11 @@ const defaultSettings = {
   facebook: "https://facebook.com/archivist",
   twitter: "https://twitter.com/archivist",
   instagram: "https://instagram.com/archivist",
+  discountPrefix: "ARCHIV",
+  discountDefaultType: "percentage",
+  discountDefaultValue: "10",
+  discountDefaultExpiryDays: "30",
+  discountDefaultMaxUses: "1",
 };
 
 async function ensureBucket() {
