@@ -156,45 +156,48 @@ export default function VoucherPopup() {
   return (
     <>
       <div className="fixed inset-0 z-[80] bg-black/60 backdrop-blur-sm" onClick={stage === "loading" ? undefined : closeAll} />
-      <div className="fixed left-1/2 top-1/2 z-[81] w-[92vw] max-w-md -translate-x-1/2 -translate-y-1/2 border border-crimson/40 bg-white p-6 dark:bg-dark-bg sm:p-8">
+      <div className="fixed left-1/2 top-1/2 z-[81] w-[90vw] max-w-sm -translate-x-1/2 -translate-y-1/2 border border-crimson/40 bg-white p-5 dark:bg-dark-bg sm:max-w-md sm:p-8">
         <button
           onClick={closeAll}
           disabled={stage === "loading"}
-          className="absolute right-4 top-4 text-dark-text-secondary transition-colors hover:text-crimson disabled:opacity-40"
+          className="absolute right-3 top-3 text-dark-text-secondary transition-colors hover:text-crimson disabled:opacity-40 sm:right-4 sm:top-4"
           aria-label="Close"
         >
-          <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+          <svg className="h-4 w-4 sm:h-5 sm:w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
           </svg>
         </button>
 
         {stage === "loading" && (
-          <div className="py-10 text-center">
-            <div className="mx-auto mb-4 h-8 w-8 animate-spin rounded-full border-2 border-crimson border-t-transparent" />
+          <div className="py-8 text-center">
+            <div className="mx-auto mb-3 h-8 w-8 animate-spin rounded-full border-2 border-crimson border-t-transparent" />
             <p className="text-sm text-dark-text-secondary">Reserving your voucher code...</p>
           </div>
         )}
 
         {stage === "revealed" && code && (
           <div className="text-center">
-            <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center bg-crimson/10">
-              <svg className="h-7 w-7 text-crimson" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+            <div className="mx-auto mb-3 flex h-11 w-11 items-center justify-center bg-crimson/10 sm:h-14 sm:w-14">
+              <svg className="h-6 w-6 text-crimson sm:h-7 sm:w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 10.5V6a3.75 3.75 0 10-7.5 0v4.5m11.356-1.993l1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 01-1.12-1.243l1.264-12A1.125 1.125 0 015.513 7.5h12.974c.576 0 1.059.435 1.119 1.007z" />
               </svg>
             </div>
-            <p className="mb-1 font-heading text-[10px] font-bold uppercase tracking-widest text-crimson">Limited Time Offer</p>
-            <h2 className="mb-2 font-heading text-2xl font-extrabold tracking-tight text-gray-900 dark:text-dark-text">
-              You get{" "}
-              <span className="text-crimson">
-                {code.type === "percentage" ? `${code.value}%` : `$${Number(code.value).toFixed(2)}`}
-              </span>{" "}
-              off any purchase
-            </h2>
-            <p className="mb-6 text-sm text-gray-500 dark:text-dark-text-secondary">
-              No sign up needed. Copy your voucher code and use it at checkout to save on your order.
+            <p className="mb-2 font-heading text-[9px] font-bold uppercase tracking-widest text-crimson sm:text-[10px]">Limited Time Offer</p>
+
+            <div className="mx-auto mb-3 w-fit rounded-lg border-2 border-crimson bg-crimson/10 px-6 py-2 sm:mb-4 sm:px-8 sm:py-3">
+              <p className="font-heading text-3xl font-black tracking-tight text-crimson sm:text-4xl">
+                {code.type === "percentage" ? `${code.value}% OFF` : `$${Number(code.value).toFixed(2)} OFF`}
+              </p>
+              <p className="mt-0.5 text-[11px] font-semibold uppercase tracking-wide text-gray-600 dark:text-dark-text-secondary sm:text-xs">
+                Any purchase
+              </p>
+            </div>
+
+            <p className="mb-3 text-xs leading-snug text-gray-500 dark:text-dark-text-secondary sm:mb-4 sm:text-sm">
+              No sign up needed. Copy your code and use it at checkout to save on your order.
             </p>
-            <div className="mx-auto mb-5 flex max-w-xs items-center justify-between gap-3 border border-dashed border-crimson bg-crimson/5 px-4 py-3">
-              <span className="font-heading text-xl font-extrabold tracking-widest text-crimson">{code.code}</span>
+            <div className="mx-auto mb-3 flex max-w-xs items-center justify-between gap-3 border border-dashed border-crimson bg-crimson/5 px-3 py-2.5 sm:mb-4 sm:px-4 sm:py-3">
+              <span className="font-heading text-lg font-extrabold tracking-widest text-crimson sm:text-xl">{code.code}</span>
               <button
                 onClick={async () => {
                   if (await copyToClipboard(code.code)) {
@@ -208,15 +211,15 @@ export default function VoucherPopup() {
               </button>
             </div>
             {code.expires_at && (
-              <p className="mb-5 text-xs text-dark-text-secondary">
+              <p className="mb-3 text-[11px] text-dark-text-secondary sm:mb-4 sm:text-xs">
                 Expires {new Date(code.expires_at).toLocaleDateString()}
               </p>
             )}
             <div className="flex flex-col gap-2">
-              <Link href="/categories" onClick={closeAll} className="btn-primary w-full text-center text-sm">
+              <Link href="/categories" onClick={closeAll} className="btn-primary w-full py-2.5 text-center text-sm">
                 Start Shopping
               </Link>
-              <button onClick={closeAll} className="w-full py-2 text-xs font-medium text-dark-text-secondary transition-colors hover:text-crimson">
+              <button onClick={closeAll} className="w-full py-1.5 text-xs font-medium text-dark-text-secondary transition-colors hover:text-crimson">
                 Close
               </button>
             </div>
