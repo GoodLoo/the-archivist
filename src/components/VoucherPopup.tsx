@@ -38,13 +38,29 @@ async function copyToClipboard(text: string) {
   }
 }
 
+function uuidv4() {
+  if (typeof crypto !== "undefined" && crypto.randomUUID) {
+    return crypto.randomUUID();
+  }
+  const bytes = (() => {
+    if (typeof crypto !== "undefined" && crypto.getRandomValues) {
+      return crypto.getRandomValues(new Uint8Array(16));
+    }
+    const b = new Uint8Array(16);
+    for (let i = 0; i < 16; i++) b[i] = Math.floor(Math.random() * 256);
+    return b;
+  })();
+  bytes[6] = (bytes[6] & 0x0f) | 0x40;
+  bytes[8] = (bytes[8] & 0x3f) | 0x80;
+  const hex = Array.from(bytes, (x) => x.toString(16).padStart(2, "0")).join("");
+  return `${hex.slice(0, 8)}-${hex.slice(8, 12)}-${hex.slice(12, 16)}-${hex.slice(16, 20)}-${hex.slice(20)}`;
+}
+
 function getDeviceId() {
+  const uuidRe = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
   let id = sessionStorage.getItem("voucher_device_id");
-  if (!id) {
-    id =
-      typeof crypto !== "undefined" && crypto.randomUUID
-        ? crypto.randomUUID()
-        : Math.random().toString(36).slice(2) + Date.now().toString(36);
+  if (!id || !uuidRe.test(id)) {
+    id = uuidv4();
     sessionStorage.setItem("voucher_device_id", id);
   }
   return id;
