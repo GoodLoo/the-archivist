@@ -73,6 +73,7 @@ export default function VoucherPopup() {
   const [code, setCode] = useState<VoucherCode | null>(null);
   const [copied, setCopied] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
+  const [vouchersEnabled, setVouchersEnabled] = useState<boolean | null>(null);
 
   const isHome = pathname === "/";
   const isProductPage = /^\/categories\/[^/]+\/[^/]+$/.test(pathname);
@@ -96,7 +97,23 @@ export default function VoucherPopup() {
   }, []);
 
   useEffect(() => {
+    let active = true;
+    fetch("/api/settings")
+      .then((r) => r.json())
+      .then((s) => {
+        if (active) setVouchersEnabled(s.voucherEnabled !== false);
+      })
+      .catch(() => {
+        if (active) setVouchersEnabled(true);
+      });
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  useEffect(() => {
     if (stage !== "idle") return;
+    if (vouchersEnabled !== true) return;
     if (!isPopupPage || !seenKey) return;
     if (sessionStorage.getItem(seenKey)) return;
 
@@ -132,10 +149,12 @@ export default function VoucherPopup() {
       }
     }, 2500);
     return () => clearTimeout(t);
-  }, [stage, pathname, isPopupPage, seenKey]);
+  }, [stage, pathname, isPopupPage, seenKey, vouchersEnabled]);
 
   const showLabel = !!code && pathname !== "/checkout";
   const closeAll = () => setStage("closed");
+
+  if (vouchersEnabled !== true) return null;
 
   if (stage === "idle" || stage === "closed") {
     if (!showLabel) return null;

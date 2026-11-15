@@ -23,6 +23,7 @@ interface Settings {
   discountDefaultValue?: string;
   discountDefaultExpiryDays?: string;
   discountDefaultMaxUses?: string;
+  voucherEnabled?: boolean;
 }
 
 export default function AdminDiscountCodesPage() {
@@ -34,6 +35,8 @@ export default function AdminDiscountCodesPage() {
   const [copied, setCopied] = useState<string | null>(null);
   const [error, setError] = useState("");
   const [batchLabel, setBatchLabel] = useState("");
+  const [voucherEnabled, setVoucherEnabled] = useState(true);
+  const [togglingVouchers, setTogglingVouchers] = useState(false);
 
   const [form, setForm] = useState({
     prefix: "ARCHIV",
@@ -59,6 +62,7 @@ export default function AdminDiscountCodesPage() {
       .then((r) => r.json())
       .then((data) => {
         setSettings(data);
+        setVoucherEnabled(data.voucherEnabled !== false);
         setForm((f) => ({
           ...f,
           prefix: data.discountPrefix || f.prefix,
@@ -123,6 +127,25 @@ export default function AdminDiscountCodesPage() {
     }
   };
 
+  const toggleVouchers = async () => {
+    const next = !voucherEnabled;
+    setVoucherEnabled(next);
+    setTogglingVouchers(true);
+    try {
+      const res = await fetch("/api/admin/settings", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ voucherEnabled: next }),
+      });
+      if (!res.ok) throw new Error("Failed to update");
+    } catch (err: any) {
+      setVoucherEnabled(!next);
+      alert(err.message);
+    } finally {
+      setTogglingVouchers(false);
+    }
+  };
+
   const copyCode = async (code: string) => {
     try {
       await navigator.clipboard.writeText(code);
@@ -153,6 +176,29 @@ export default function AdminDiscountCodesPage() {
         <h1 className="font-heading text-2xl font-extrabold tracking-tight">
           Discount Code<span className="text-crimson">s</span>
         </h1>
+      </div>
+
+      <div className="mb-6 flex items-center justify-between border border-dark-border dark:border-dark-border border-gray-200 bg-dark-surface dark:bg-dark-surface bg-white p-4">
+        <div>
+          <p className="font-heading text-sm font-bold uppercase tracking-wider">Voucher Notices</p>
+          <p className="mt-0.5 text-[11px] text-dark-text-secondary dark:text-dark-text-secondary text-gray-500">
+            {voucherEnabled
+              ? "On — customers see the voucher popup and the voucher notice on the site."
+              : "Off — the voucher popup and notice are hidden from customers."}
+          </p>
+        </div>
+        <button
+          onClick={toggleVouchers}
+          disabled={togglingVouchers}
+          role="switch"
+          aria-checked={voucherEnabled}
+          aria-label="Toggle voucher notices"
+          className={`relative h-6 w-11 shrink-0 rounded-full transition-colors disabled:opacity-50 ${voucherEnabled ? "bg-green-500" : "bg-gray-400"}`}
+        >
+          <span
+            className={`absolute top-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform ${voucherEnabled ? "translate-x-[22px]" : "translate-x-0.5"}`}
+          />
+        </button>
       </div>
 
       <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 mb-6">

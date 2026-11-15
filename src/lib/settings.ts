@@ -6,12 +6,14 @@ const defaults = {
   taxRate: "8.875",
   freeShippingThreshold: "100",
   shippingCost: "15.99",
+  voucherEnabled: true,
 };
 
 export interface StoreSettings {
   taxRate: string;
   freeShippingThreshold: string;
   shippingCost: string;
+  voucherEnabled: boolean;
   [key: string]: any;
 }
 

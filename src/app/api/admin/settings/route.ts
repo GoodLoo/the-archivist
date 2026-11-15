@@ -20,6 +20,7 @@ const defaultSettings = {
   discountDefaultValue: "10",
   discountDefaultExpiryDays: "30",
   discountDefaultMaxUses: "1",
+  voucherEnabled: true,
 };
 
 async function ensureBucket() {
@@ -59,9 +60,15 @@ export async function PUT(request: Request) {
     await ensureBucket();
     const body = await request.json();
 
+    let existing: Record<string, any> = {};
+    try {
+      const { data } = await supabaseAdmin.storage.from("store").download(SETTINGS_FILE);
+      if (data) existing = JSON.parse(await data.text());
+    } catch {}
+
     await supabaseAdmin.storage
       .from("store")
-      .upload(SETTINGS_FILE, JSON.stringify({ ...defaultSettings, ...body }, null, 2), {
+      .upload(SETTINGS_FILE, JSON.stringify({ ...defaultSettings, ...existing, ...body }, null, 2), {
         contentType: "application/json",
         upsert: true,
       });
