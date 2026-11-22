@@ -90,13 +90,6 @@ export default function RootLayout({
       <body
         className={`${spaceGrotesk.variable} ${inter.variable} font-body bg-dark-bg text-dark-text dark:bg-dark-bg dark:text-dark-text bg-light-bg text-light-text`}
       >
-        <Script id="gtm-init" strategy="afterInteractive">
-          {`
-            window.dataLayer = window.dataLayer || [];
-            function gtag(){dataLayer.push(arguments);}
-            gtag('js', new Date());
-          `}
-        </Script>
         <Script
           id="gtm"
           strategy="afterInteractive"
