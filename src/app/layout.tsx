@@ -7,6 +7,7 @@ import { CustomerAuthProvider } from "@/context/CustomerAuthContext";
 import SiteLayout from "@/components/SiteLayout";
 import JsonLd from "@/components/JsonLd";
 import { Analytics } from "@vercel/analytics/react";
+import Script from "next/script";
 import "./globals.css";
 
 const spaceGrotesk = Space_Grotesk({
@@ -89,6 +90,26 @@ export default function RootLayout({
       <body
         className={`${spaceGrotesk.variable} ${inter.variable} font-body bg-dark-bg text-dark-text dark:bg-dark-bg dark:text-dark-text bg-light-bg text-light-text`}
       >
+        <Script id="gtm-init" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+          `}
+        </Script>
+        <Script
+          id="gtm"
+          strategy="afterInteractive"
+          src="https://www.googletagmanager.com/gtm.js?id=GTM-5HHRZ68H"
+        />
+        <noscript>
+          <iframe
+            src="https://www.googletagmanager.com/ns.html?id=GTM-5HHRZ68H"
+            height="0"
+            width="0"
+            style={{ display: "none", visibility: "hidden" }}
+          />
+        </noscript>
         <JsonLd />
         <ThemeProvider>
           <CartProvider>
