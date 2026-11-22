@@ -3,6 +3,7 @@
 import { useEffect, useState, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
+import { trackPurchaseConversion } from "@/lib/gtm";
 
 function ConfirmationContent() {
   const searchParams = useSearchParams();
@@ -13,7 +14,17 @@ function ConfirmationContent() {
   useEffect(() => {
     const stored = sessionStorage.getItem("lastOrder");
     if (stored) {
-      setOrder(JSON.parse(stored));
+      try {
+        const parsed = JSON.parse(stored);
+        setOrder(parsed);
+        if (parsed?.payment_status === "paid" && parsed?.orderNumber && typeof parsed?.total === "number") {
+          trackPurchaseConversion({
+            transactionId: parsed.orderNumber,
+            value: parsed.total,
+            currency: "CNY",
+          });
+        }
+      } catch {}
     }
   }, []);
 

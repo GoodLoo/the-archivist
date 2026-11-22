@@ -102,6 +102,19 @@ export default function RootLayout({
           strategy="afterInteractive"
           src="https://www.googletagmanager.com/gtm.js?id=GTM-5HHRZ68H"
         />
+        <Script
+          id="gtag-ads"
+          strategy="afterInteractive"
+          src="https://www.googletagmanager.com/gtag/js?id=AW-18501684540"
+        />
+        <Script id="gtag-ads-init" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', 'AW-18501684540');
+          `}
+        </Script>
         <noscript>
           <iframe
             src="https://www.googletagmanager.com/ns.html?id=GTM-5HHRZ68H"
